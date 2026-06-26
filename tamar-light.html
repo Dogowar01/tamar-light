@@ -30,9 +30,12 @@
   body{background:var(--ground);color:var(--ink);font-family:var(--sans);
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;min-height:100%;overflow-x:hidden;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
-  #sky{position:fixed;inset:0;z-index:-1;background:
-      radial-gradient(120% 70% at 50% -10%, var(--tint) 0%, transparent 60%),
+  #sky{position:fixed;inset:0;z-index:-2;background:
+      radial-gradient(120% 70% at 50% -10%, var(--tint) 0%, transparent 58%),
+      radial-gradient(140% 110% at 50% 32%, transparent 58%, rgba(0,0,0,.5) 100%),
       linear-gradient(180deg, var(--ground) 0%, var(--ground2) 100%);transition:background 2.4s ease;}
+  #grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:soft-light;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
   @media (prefers-reduced-motion:reduce){#sky{transition:none}}
   .wrap{max-width:560px;margin:0 auto;padding:34px 26px 56px;}
   header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:38px}
@@ -46,7 +49,7 @@
     display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-dim);transition:border-color .2s,color .2s}
   .iconbtn:hover{border-color:var(--ink-dim);color:var(--ink)}
   .moon{display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}
-  .moon .glyph{width:30px;height:30px;display:block}
+  .moon .glyph{width:34px;height:34px;display:block}
   .moon .mname{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
   .now-eyebrow{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:11px}
   .now-phase{font-family:var(--serif);font-weight:300;font-size:clamp(38px,12vw,54px);line-height:.96;letter-spacing:-.01em}
@@ -64,16 +67,19 @@
   .verdict .vtext{font-size:13px;line-height:1.5}
   .verdict .vhead{color:var(--ink);font-weight:500}
   .verdict .vbody{color:var(--ink-dim);margin-top:2px;font-variant-numeric:tabular-nums}
-  .meridian-wrap{margin:40px 0 30px;display:grid;grid-template-columns:34px 1fr;gap:18px}
-  .spine{position:relative;border-radius:30px;overflow:hidden;min-height:340px}
-  .spine .glass{position:absolute;inset:0;border-radius:30px;box-shadow:inset 0 0 0 1px var(--hair-soft)}
+  .meridian-wrap{margin:40px 0 30px;display:grid;grid-template-columns:40px 1fr;gap:22px}
+  .spine{position:relative;border-radius:20px;overflow:hidden;min-height:470px;
+    box-shadow:0 1px 0 rgba(236,234,227,.05), 0 22px 50px -26px rgba(0,0,0,.9)}
+  .spine .glass{position:absolute;inset:0;border-radius:20px;box-shadow:inset 0 0 0 1px var(--hair-soft),
+    inset 0 1px 3px rgba(255,255,255,.06), inset 0 -10px 24px rgba(0,0,0,.35)}
   .spine .ridge{position:absolute;left:0;right:0;background:repeating-linear-gradient(180deg,rgba(7,9,13,.55),rgba(7,9,13,.55) 3px,rgba(7,9,13,.30) 3px,rgba(7,9,13,.30) 6px)}
+  .spine .star{position:absolute;border-radius:50%;background:#ECEAE3;transform:translate(-50%,-50%);box-shadow:0 0 3px rgba(236,234,227,.55)}
   .events{position:relative}
   .ev{position:absolute;left:0;right:0;transform:translateY(-50%);display:flex;align-items:baseline;gap:10px;padding-left:2px}
   .ev .t{font-family:var(--mono);font-size:12.5px;color:var(--ink);letter-spacing:.02em;font-variant-numeric:tabular-nums;min-width:46px}
   .ev .l{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint)}
   .ev.minor .t{color:var(--ink-dim)}
-  .ev .tick{position:absolute;left:-18px;top:50%;width:11px;height:1px;background:var(--hair);transform:translateY(-50%)}
+  .ev .lead{position:absolute;left:-22px;top:50%;overflow:visible;pointer-events:none}
   .nowmark{position:absolute;left:-34px;right:0;transform:translateY(-50%);pointer-events:none}
   .nowmark .line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,var(--ink) 0%,var(--hair) 70%,transparent)}
   .nowmark .bead{position:absolute;left:-3px;top:50%;width:7px;height:7px;border-radius:50%;background:var(--ink);transform:translate(-50%,-50%);box-shadow:0 0 9px 1px rgba(236,234,227,.6)}
@@ -134,6 +140,7 @@
 </head>
 <body>
 <div id="sky"></div>
+<div id="grain"></div>
 <div class="wrap">
   <header>
     <div class="brand">
@@ -150,7 +157,7 @@
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 4l3-3 3 3M2 8v4h10V8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="moon">
-        <svg class="glyph" id="moonglyph" viewBox="0 0 30 30" aria-hidden="true"></svg>
+        <svg class="glyph" id="moonglyph" viewBox="-3 -3 36 36" aria-hidden="true"></svg>
         <div class="mname" id="moonname">&#8212;</div>
       </div>
     </div>
@@ -243,6 +250,9 @@ const PRESETS=[
   {n:'Narawntapu',d:'41.13S 146.62E',lat:-41.13,lng:146.62}
 ];
 const TZ='Australia/Hobart';
+/* fixed faint stars for the dark zones of the meridian (x in px across 40px spine, y as day-fraction, brightness) */
+const STARS=[[8,.04,.9],[24,.07,.6],[32,.03,.8],[15,.12,.5],[34,.15,.7],[6,.17,.6],[27,.20,.45],[19,.09,.55],
+  [11,.84,.6],[31,.80,.8],[18,.90,.5],[25,.93,.7],[7,.96,.55],[34,.88,.5],[14,.79,.55],[22,.86,.45]];
 const LS_PLACE='tamarlight.place',LS_WX='tamarlight.wx.',LS_SPOTS='tamarlight.spots',LS_RIDGE='tamarlight.ridge';
 let customSpots=load(LS_SPOTS,[]);
 let ridgeMap=load(LS_RIDGE,{});
@@ -344,16 +354,42 @@ function trueDark(dayDate,lat,lng){
   return{start,end,dark:best};
 }
 
-/* moon glyph (southern orientation) */
+/* moon glyph (shaded sphere, lit fraction with maria texture) */
 function drawMoon(frac,phase){
-  const r=15,waxing=phase<0.5,g=el('moonglyph'),ns='http://www.w3.org/2000/svg';g.innerHTML='';
-  const disk=document.createElementNS(ns,'circle');disk.setAttribute('cx',r);disk.setAttribute('cy',r);
-  disk.setAttribute('r',r-0.5);disk.setAttribute('fill','none');disk.setAttribute('stroke','rgba(236,234,227,.18)');disk.setAttribute('stroke-width','1');g.appendChild(disk);
-  if(frac<=0.01)return;
-  const sweepOuter=waxing?0:1,innerSweep=frac>0.5?sweepOuter:1-sweepOuter,R=r-0.5,rx=R*Math.abs(1-2*frac);
-  const lit=document.createElementNS(ns,'path');
-  lit.setAttribute('d','M '+r+' '+(r-R)+' A '+R+' '+R+' 0 0 '+sweepOuter+' '+r+' '+(r+R)+' A '+rx+' '+R+' 0 0 '+innerSweep+' '+r+' '+(r-R)+' Z');
-  lit.setAttribute('fill','rgba(236,234,227,.82)');g.appendChild(lit);
+  const g=el('moonglyph'),r=15,R=r-0.6,waxing=phase<0.5;
+  if(frac<0.015){g.innerHTML='<circle cx="15" cy="15" r="'+R+'" fill="#0e1119" stroke="rgba(236,234,227,.16)" stroke-width="1"/>';return;}
+  const sweepOuter=waxing?0:1,innerSweep=frac>0.5?sweepOuter:1-sweepOuter,rx=(R*Math.abs(1-2*frac)).toFixed(2);
+  const lit='M 15 '+(15-R)+' A '+R+' '+R+' 0 0 '+sweepOuter+' 15 '+(15+R)+' A '+rx+' '+R+' 0 0 '+innerSweep+' 15 '+(15-R)+' Z';
+  const gx=waxing?63:37; // pull the sphere highlight toward the lit limb
+  g.innerHTML=
+    '<defs>'+
+      '<radialGradient id="msurf" cx="'+gx+'%" cy="35%" r="78%">'+
+        '<stop offset="0%" stop-color="#f8f5ed"/><stop offset="46%" stop-color="#e4dfd2"/>'+
+        '<stop offset="80%" stop-color="#c6c0b0"/><stop offset="100%" stop-color="#a39d8c"/>'+
+      '</radialGradient>'+
+      '<radialGradient id="mhalo" cx="50%" cy="50%" r="50%">'+
+        '<stop offset="60%" stop-color="rgba(236,234,227,0)"/><stop offset="82%" stop-color="rgba(236,234,227,.12)"/>'+
+        '<stop offset="100%" stop-color="rgba(236,234,227,0)"/>'+
+      '</radialGradient>'+
+      '<clipPath id="mclip"><path d="'+lit+'"/></clipPath>'+
+      '<filter id="mblur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="0.55"/></filter>'+
+    '</defs>'+
+    '<circle cx="15" cy="15" r="18" fill="url(#mhalo)"/>'+
+    '<circle cx="15" cy="15" r="'+R+'" fill="#0d1018"/>'+
+    '<path d="'+lit+'" fill="url(#msurf)"/>'+
+    '<g clip-path="url(#mclip)" filter="url(#mblur)" fill="#aaa491">'+
+      '<ellipse cx="10.4" cy="9.8" rx="3.2" ry="2.6" opacity=".42"/>'+
+      '<ellipse cx="15.4" cy="11.4" rx="2.1" ry="1.8" opacity=".34"/>'+
+      '<ellipse cx="18.7" cy="14.8" rx="2.8" ry="2.4" opacity=".38"/>'+
+      '<ellipse cx="12.0" cy="16.6" rx="2.4" ry="2.0" opacity=".40"/>'+
+      '<ellipse cx="16.6" cy="19.6" rx="2.0" ry="1.7" opacity=".30"/>'+
+      '<ellipse cx="9.3" cy="19.2" rx="1.5" ry="1.3" opacity=".26"/>'+
+    '</g>'+
+    '<g clip-path="url(#mclip)" fill="#fdfaf3">'+
+      '<circle cx="13" cy="21.6" r=".7" opacity=".5"/><circle cx="20.2" cy="9.4" r=".6" opacity=".45"/>'+
+      '<circle cx="7.6" cy="13.2" r=".5" opacity=".4"/>'+
+    '</g>'+
+    '<circle cx="15" cy="15" r="'+R+'" fill="none" stroke="rgba(236,234,227,.13)" stroke-width="0.8"/>';
 }
 
 /* meridian */
@@ -368,7 +404,11 @@ function spineGradient(T){
 }
 function buildSpine(T,p){
   const sp=el('spine');sp.style.background=spineGradient(T);
-  sp.querySelectorAll('.ridge').forEach(n=>n.remove());
+  sp.querySelectorAll('.ridge,.star').forEach(n=>n.remove());
+  const adF=dayFraction(T.astroDawn),duF=dayFraction(T.astroDusk);
+  STARS.forEach(function(s){const f=s[1];if(f>adF-0.015&&f<duF+0.015)return;
+    const st=document.createElement('div');st.className='star';st.style.left=s[0]+'px';st.style.top=(f*100)+'%';
+    const sz=(1.2+s[2]*0.8).toFixed(1);st.style.width=st.style.height=sz+'px';st.style.opacity=(s[2]*0.55).toFixed(2);sp.appendChild(st);});
   const rg=ridgeOf(p);
   if(rg.e>0){const eff=riseSetForAngle(baseDate(),p.lat,p.lng,rg.e).rise,h=dayFraction(eff)*100;
     const band=document.createElement('div');band.className='ridge';band.style.top='0';band.style.height=h+'%';sp.appendChild(band);}
@@ -385,9 +425,22 @@ function buildEvents(T,now,p){
     [T.solarNoon,'Solar noon',1],[T.goldStartPM,'Golden begins',1],[ssTime,rg.w>0?'Hits W ridge':'Sunset',0],
     [T.lastLight,'Last light',0]
   ];
-  for(const item of list){const d=item[0],label=item[1],minor=item[2];if(!d||isNaN(d))continue;
-    const e=document.createElement('div');e.className='ev'+(minor?' minor':'');e.style.top=(dayFraction(d)*100)+'%';
-    e.innerHTML='<span class="tick"></span><span class="t">'+fmtT(d)+'</span><span class="l">'+label+'</span>';wrap.appendChild(e);}
+  const H=el('spine').getBoundingClientRect().height||470,gap=18,pad=9;
+  const evs=list.filter(it=>it[0]&&!isNaN(it[0]))
+    .map(it=>({d:it[0],label:it[1],minor:it[2],trueY:dayFraction(it[0])*H}))
+    .sort((a,b)=>a.trueY-b.trueY);
+  // declutter: forward pass enforces a minimum gap, backward pass keeps everything inside the spine
+  for(let i=0;i<evs.length;i++)evs[i].y=i===0?Math.max(evs[i].trueY,pad):Math.max(evs[i].trueY,evs[i-1].y+gap);
+  if(evs.length&&evs[evs.length-1].y>H-pad){evs[evs.length-1].y=H-pad;
+    for(let i=evs.length-2;i>=0;i--)if(evs[i].y>evs[i+1].y-gap)evs[i].y=evs[i+1].y-gap;}
+  for(const ev of evs){
+    const delta=(ev.trueY-ev.y).toFixed(1),e=document.createElement('div');
+    e.className='ev'+(ev.minor?' minor':'');e.style.top=ev.y+'px';
+    e.innerHTML='<svg class="lead" width="22" height="1" viewBox="0 0 22 1" preserveAspectRatio="none">'+
+      '<line x1="0.6" y1="'+delta+'" x2="20" y2="0" stroke="rgba(236,234,227,.22)" stroke-width="1"/>'+
+      '<circle cx="0.6" cy="'+delta+'" r="1.4" fill="rgba(236,234,227,.5)"/></svg>'+
+      '<span class="t">'+fmtT(ev.d)+'</span><span class="l">'+ev.label+'</span>';
+    wrap.appendChild(e);}
   if(isToday()){const f=dayFraction(now),m=document.createElement('div');m.className='nowmark';m.style.top=(f*100)+'%';
     m.innerHTML='<span class="line"></span><span class="bead"></span><span class="nlabel">Now</span>';wrap.appendChild(m);}
 }
