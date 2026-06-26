@@ -21,6 +21,7 @@
     --civil:#284463; --blue:#34577d; --gold:#D8A24E; --gold-soft:#C98F46;
     --day:#9FB1C2; --day-pale:#AEBED0;
     --tint:#10131C;
+    --accent:#AEBED0; --accent-glow:rgba(174,190,208,.16);
     --serif:'Fraunces',Georgia,'Times New Roman',serif;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --mono:ui-monospace,'SF Mono','SFMono-Regular',Menlo,Consolas,monospace;
@@ -59,10 +60,16 @@
   .read .q{color:var(--ink-dim)}
   .shadow{margin-top:16px;display:flex;align-items:center;gap:13px;font-size:13px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
   .shadow svg{flex:none} .shadow b{color:var(--ink);font-weight:500}
-  .verdict{margin-top:22px;padding:15px 17px;border:1px solid var(--hair);border-radius:3px;display:flex;gap:13px;align-items:flex-start}
+  .verdict{margin-top:22px;padding:15px 17px 15px 19px;border:1px solid var(--hair);border-radius:5px;display:flex;gap:13px;align-items:flex-start;position:relative;overflow:hidden;transition:background .6s ease,border-color .6s ease}
+  .verdict::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--ink-faint)}
   .verdict .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none;background:var(--ink-faint)}
+  .verdict.clear{background:linear-gradient(100deg,rgba(216,162,78,.08),transparent 62%);border-color:rgba(216,162,78,.24)}
+  .verdict.clear::before{background:var(--gold);box-shadow:0 0 12px 0 var(--gold)}
   .verdict.clear .dot{background:var(--gold);box-shadow:0 0 11px 1px var(--gold)}
+  .verdict.partly{background:linear-gradient(100deg,rgba(174,190,208,.055),transparent 62%)}
+  .verdict.partly::before{background:var(--day-pale)}
   .verdict.partly .dot{background:var(--day-pale)}
+  .verdict.cloudy::before{background:var(--ink-faint)}
   .verdict.cloudy .dot{background:var(--ink-faint)}
   .verdict .vtext{font-size:13px;line-height:1.5}
   .verdict .vhead{color:var(--ink);font-weight:500}
@@ -80,10 +87,15 @@
   .ev .l{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint)}
   .ev.minor .t{color:var(--ink-dim)}
   .ev .lead{position:absolute;left:-22px;top:50%;overflow:visible;pointer-events:none}
-  .nowmark{position:absolute;left:-34px;right:0;transform:translateY(-50%);pointer-events:none}
-  .nowmark .line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,var(--ink) 0%,var(--hair) 70%,transparent)}
-  .nowmark .bead{position:absolute;left:-3px;top:50%;width:7px;height:7px;border-radius:50%;background:var(--ink);transform:translate(-50%,-50%);box-shadow:0 0 9px 1px rgba(236,234,227,.6)}
+  .nowmark{position:absolute;left:-42px;right:0;transform:translateY(-50%);pointer-events:none}
+  .nowmark .bloom{position:absolute;left:0;top:50%;width:240px;height:170px;transform:translateY(-50%);
+    background:radial-gradient(closest-side,var(--accent-glow) 0%,transparent 72%);pointer-events:none}
+  .nowmark .line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,var(--accent) 0%,var(--hair) 64%,transparent);opacity:.5}
+  .nowmark .token{position:absolute;left:0;top:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);
+    background:radial-gradient(circle at 38% 34%,#fff,var(--accent) 72%);box-shadow:0 0 12px 2px var(--accent-glow),0 0 3px 0 var(--accent)}
   .nowmark .nlabel{position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:var(--ground);padding:2px 6px;border-radius:2px}
+  @media (prefers-reduced-motion:no-preference){.nowmark .token{animation:tokenpulse 3.6s ease-in-out infinite}}
+  @keyframes tokenpulse{0%,100%{box-shadow:0 0 10px 1px var(--accent-glow),0 0 3px 0 var(--accent)}50%{box-shadow:0 0 17px 4px var(--accent-glow),0 0 4px 0 var(--accent)}}
   .cond{display:flex;flex-wrap:wrap;gap:6px 22px;padding-top:22px;border-top:1px solid var(--hair-soft);font-size:12.5px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
   .cond .pair b{color:var(--ink);font-weight:500}
   .cond .src{width:100%;font-size:11px;color:var(--ink-faint);letter-spacing:.03em;margin-top:3px}
@@ -136,6 +148,23 @@
   @media (min-width:600px){.sheet-bg{align-items:center}.sheet{border-radius:14px;border-bottom:1px solid var(--hair)}}
   .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--ink);color:var(--ground);font-size:13px;padding:11px 18px;border-radius:6px;z-index:30;opacity:0;transition:opacity .25s;pointer-events:none}
   .toast.show{opacity:1}
+  /* conditions row glyphs */
+  .cond .pair{display:inline-flex;align-items:center;gap:7px}
+  .cond .pair svg{flex:none;color:var(--ink-faint);opacity:.85}
+  /* header hairline */
+  header{padding-bottom:16px;border-bottom:1px solid var(--hair-soft)}
+  /* motion: breath on load + crossfade on change */
+  @keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+  @keyframes swapfade{from{opacity:.15}to{opacity:1}}
+  @media (prefers-reduced-motion:no-preference){
+    body.boot header{animation:rise .5s both}
+    body.boot .now-block{animation:rise .5s .07s both}
+    body.boot .meridian-wrap{animation:rise .55s .15s both}
+    body.boot .cond,body.boot #fogline,body.boot #darkline{animation:rise .5s .23s both}
+    body.boot .planner{animation:rise .5s .3s both}
+    body.boot footer{animation:rise .5s .36s both}
+    .swapping{animation:swapfade .4s ease}
+  }
 </style>
 </head>
 <body>
@@ -442,7 +471,7 @@ function buildEvents(T,now,p){
       '<span class="t">'+fmtT(ev.d)+'</span><span class="l">'+ev.label+'</span>';
     wrap.appendChild(e);}
   if(isToday()){const f=dayFraction(now),m=document.createElement('div');m.className='nowmark';m.style.top=(f*100)+'%';
-    m.innerHTML='<span class="line"></span><span class="bead"></span><span class="nlabel">Now</span>';wrap.appendChild(m);}
+    m.innerHTML='<span class="bloom"></span><span class="line"></span><span class="token"></span><span class="nlabel">Now</span>';wrap.appendChild(m);}
 }
 
 /* verdict */
@@ -463,8 +492,12 @@ function verdictFor(T,now){
 function render(){
   const p=placeNow(),date=baseDate(),now=new Date(),T=sunTimes(date,p.lat,p.lng);
   const evalDate=isToday()?now:T.solarNoon,pos=sunPos(evalDate,p.lat,p.lng),ph=phaseOf(pos.altitude),rising=evalDate<T.solarNoon;
-  const tintMap={night:'#0d1018',astro:'#141826',naut:'#1c2740',blue:'#27425f',golden:'#5a4526',day:'#39434f'};
+  const tintMap={night:'#0d1018',astro:'#141826',naut:'#1c2740',blue:'#27425f',golden:'#6a5026',day:'#39434f'};
   el('sky').style.setProperty('--tint',isToday()?tintMap[ph]:'#10131C');
+  const accentMap={night:'#5d6b86',astro:'#4f6a90',naut:'#5274a0',blue:'#6c93bd',golden:'#E8AC55',day:'#B9C6D6'};
+  const glowMap={night:'rgba(120,150,200,.10)',astro:'rgba(95,135,195,.12)',naut:'rgba(95,145,205,.14)',blue:'rgba(120,165,215,.16)',golden:'rgba(232,172,85,.20)',day:'rgba(185,198,214,.14)'};
+  const root=document.documentElement.style;
+  root.setProperty('--accent',accentMap[ph]);root.setProperty('--accent-glow',glowMap[ph]);
   buildSpine(T,p);buildEvents(T,now,p);
   el('locname').textContent=p.n;
   const mi=moonIllum(now);drawMoon(mi.fraction,mi.phase);el('moonname').textContent=Math.round(mi.fraction*100)+'% \u00b7 '+moonName(mi.phase);
@@ -516,10 +549,18 @@ function renderCond(now){
   const sky=cl<15?'clear':cl<50?'part cloud':cl<85?'overcast-ish':'overcast';
   const pairs=[['Sky',cl+'% \u00b7 '+sky],['Temp',Math.round(temp)+'\u00b0'],['Wind',wind+' km/h']];
   if(precip!=null&&precip>=20)pairs.push(['Rain',precip+'%']);
-  pairs.reverse().forEach(function(pr){const d=document.createElement('div');d.className='pair';d.innerHTML=pr[0]+' <b>'+pr[1]+'</b>';c.insertBefore(d,src);});
+  pairs.reverse().forEach(function(pr){const d=document.createElement('div');d.className='pair';d.innerHTML=condGlyph(pr[0])+'<span>'+pr[0]+' <b>'+pr[1]+'</b></span>';c.insertBefore(d,src);});
   const ageH=(Date.now()-wx.t)/3600000;
   if(wx.stale||ageH>3){src.textContent='Sky cached '+(ageH<1?'just now':Math.round(ageH)+' h ago')+(wx.stale?' \u00b7 offline':'');src.className='src stale';}
   else{src.textContent='Sky updated '+(ageH<1?'just now':Math.round(ageH)+' h ago')+' \u00b7 Open-Meteo';src.className='src';}
+}
+function condGlyph(k){
+  const s='stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  if(k==='Sky')return '<svg width="15" height="13" viewBox="0 0 15 13"><path d="M4 11h7a2.6 2.6 0 0 0 .3-5.2A3.4 3.4 0 0 0 4.7 5 2.9 2.9 0 0 0 4 11Z" '+s+'/></svg>';
+  if(k==='Temp')return '<svg width="11" height="14" viewBox="0 0 11 14"><path d="M5.5 1.8a1.8 1.8 0 0 0-1.8 1.8v4.9a3 3 0 1 0 3.6 0V3.6a1.8 1.8 0 0 0-1.8-1.8Z" '+s+'/><circle cx="5.5" cy="10.7" r="1.1" fill="currentColor" stroke="none"/></svg>';
+  if(k==='Wind')return '<svg width="15" height="13" viewBox="0 0 15 13"><path d="M1 4h8a1.9 1.9 0 1 0-1.9-1.9M1 7h11a2 2 0 1 1-2 2M1 10h6" '+s+'/></svg>';
+  if(k==='Rain')return '<svg width="12" height="14" viewBox="0 0 12 14"><path d="M6 1.5C3.8 4.3 2.2 6.4 2.2 8.3a3.8 3.8 0 1 0 7.6 0C9.8 6.4 8.2 4.3 6 1.5Z" '+s+'/></svg>';
+  return '';
 }
 function renderFog(date){
   const f=fogFor(date),l=el('fogline');if(!f){l.style.display='none';return;}
@@ -546,7 +587,7 @@ function renderPlanner(){
     const dn=new Intl.DateTimeFormat('en-AU',{timeZone:TZ,day:'numeric'}).format(d);
     const b=document.createElement('button');b.className='pday'+(off===dayOffset?' sel':'');
     b.innerHTML='<span class="pl">'+wl+'</span><span class="pdot '+ec.state+'" title="'+(ec.cl!=null?ec.cl+'% cloud':'no data')+'"></span><span class="pn">'+dn+'</span>';
-    (function(o){b.onclick=function(){dayOffset=o;render();};})(off);
+    (function(o){b.onclick=function(){dayOffset=o;render();swapAnim();};})(off);
     wk.appendChild(b);
   }
 }
@@ -584,7 +625,7 @@ function wireSheet(){
     b.onclick=function(e){
       if(e.target.dataset.del){e.stopPropagation();delSpot(e.target.dataset.del);return;}
       activeKey=b.dataset.k;tempPlace=null;save(LS_PLACE,activeKey);closeSheet();
-      wx=loadWxCache(placeNow());render();fetchWx(placeNow()).then(render);
+      wx=loadWxCache(placeNow());render();swapAnim();fetchWx(placeNow()).then(render);
     };
   });
   el('sheet').querySelectorAll('.stepper button').forEach(function(b){
@@ -691,12 +732,13 @@ async function shareCard(){
 /* toast + wiring */
 let toastTimer;
 function toast(msg){const t=el('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2200);}
+function swapAnim(){document.querySelectorAll('.now-block,.meridian-wrap').forEach(function(n){n.classList.remove('swapping');void n.offsetWidth;n.classList.add('swapping');});}
 el('locbtn').onclick=openSheet;
 el('sharebtn').onclick=shareCard;
 el('sheetbg').onclick=function(e){if(e.target===el('sheetbg'))closeSheet();};
 
 /* boot */
-async function boot(){wx=loadWxCache(placeNow());render();await fetchWx(placeNow());render();}
+async function boot(){document.body.classList.add('boot');wx=loadWxCache(placeNow());render();await fetchWx(placeNow());render();}
 boot();
 setInterval(function(){if(isToday())render();},60000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&isToday())render();});
