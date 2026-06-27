@@ -11,7 +11,7 @@
 <link rel="manifest" href='data:application/manifest+json,{"name":"Tamar Light","short_name":"Tamar Light","display":"standalone","background_color":"%230B0E14","theme_color":"%230B0E14","start_url":"."}'>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
 <style>
   :root{
     --ground:#0B0E14; --ground2:#070910;
@@ -32,9 +32,10 @@
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;min-height:100%;overflow-x:hidden;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
   #sky{position:fixed;inset:0;z-index:-2;background:
-      radial-gradient(120% 70% at 50% -10%, var(--tint) 0%, transparent 58%),
-      radial-gradient(140% 110% at 50% 32%, transparent 58%, rgba(0,0,0,.5) 100%),
-      linear-gradient(180deg, var(--ground) 0%, var(--ground2) 100%);transition:background 2.4s ease;}
+      radial-gradient(115% 48% at 50% -4%, var(--sky-glow,transparent) 0%, transparent 62%),
+      radial-gradient(130% 74% at 50% -10%, var(--tint) 0%, transparent 56%),
+      radial-gradient(150% 120% at 50% 26%, transparent 52%, rgba(0,0,0,.58) 100%),
+      linear-gradient(180deg, var(--ground) 0%, var(--ground2) 60%, #05060b 100%);transition:background 2.4s ease;}
   #grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:soft-light;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
   @media (prefers-reduced-motion:reduce){#sky{transition:none}}
@@ -52,12 +53,13 @@
   .moon{display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}
   .moon .glyph{width:34px;height:34px;display:block}
   .moon .mname{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint)}
-  .now-eyebrow{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:11px}
-  .now-phase{font-family:var(--serif);font-weight:300;font-size:clamp(38px,12vw,54px);line-height:.96;letter-spacing:-.01em}
-  .now-sub{margin-top:13px;font-size:14px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
+  .now-eyebrow{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:13px;display:inline-flex;align-items:center;gap:9px}
+  .now-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 9px 1px var(--accent-glow)}
+  .now-phase{font-family:var(--serif);font-weight:300;font-variation-settings:'opsz' 144;font-size:clamp(44px,13.5vw,64px);line-height:.92;letter-spacing:-.018em}
+  .now-sub{margin-top:15px;font-size:14px;color:var(--ink-dim);font-variant-numeric:tabular-nums;letter-spacing:.005em}
   .now-sub b{color:var(--ink);font-weight:500}
-  .read{margin-top:18px;font-size:14.5px;line-height:1.55;color:var(--ink);max-width:42ch}
-  .read .q{color:var(--ink-dim)}
+  .read{margin-top:21px;font-family:var(--serif);font-weight:400;font-variation-settings:'opsz' 28;font-size:17.5px;line-height:1.5;color:var(--ink);max-width:33ch;letter-spacing:.003em}
+  .read .q{color:var(--ink-dim);font-style:italic}
   .shadow{margin-top:16px;display:flex;align-items:center;gap:13px;font-size:13px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
   .shadow svg{flex:none} .shadow b{color:var(--ink);font-weight:500}
   .verdict{margin-top:22px;padding:15px 17px 15px 19px;border:1px solid var(--hair);border-radius:5px;display:flex;gap:13px;align-items:flex-start;position:relative;overflow:hidden;transition:background .6s ease,border-color .6s ease}
@@ -76,9 +78,11 @@
   .verdict .vbody{color:var(--ink-dim);margin-top:2px;font-variant-numeric:tabular-nums}
   .meridian-wrap{margin:40px 0 30px;display:grid;grid-template-columns:40px 1fr;gap:22px}
   .spine{position:relative;border-radius:20px;overflow:hidden;min-height:470px;
-    box-shadow:0 1px 0 rgba(236,234,227,.05), 0 22px 50px -26px rgba(0,0,0,.9)}
-  .spine .glass{position:absolute;inset:0;border-radius:20px;box-shadow:inset 0 0 0 1px var(--hair-soft),
-    inset 0 1px 3px rgba(255,255,255,.06), inset 0 -10px 24px rgba(0,0,0,.35)}
+    box-shadow:0 1px 0 rgba(236,234,227,.06), 0 22px 50px -26px rgba(0,0,0,.9), 0 0 54px -6px var(--accent-glow);
+    transition:box-shadow 2.4s ease}
+  .spine .glass{position:absolute;inset:0;border-radius:20px;
+    background:linear-gradient(102deg,rgba(255,255,255,.07) 0%,transparent 16%,transparent 80%,rgba(0,0,0,.16) 100%);
+    box-shadow:inset 0 0 0 1px var(--hair-soft),inset 0 1px 3px rgba(255,255,255,.07),inset 0 -10px 24px rgba(0,0,0,.35)}
   .spine .ridge{position:absolute;left:0;right:0;background:repeating-linear-gradient(180deg,rgba(7,9,13,.55),rgba(7,9,13,.55) 3px,rgba(7,9,13,.30) 3px,rgba(7,9,13,.30) 6px)}
   .spine .star{position:absolute;border-radius:50%;background:#ECEAE3;transform:translate(-50%,-50%);box-shadow:0 0 3px rgba(236,234,227,.55)}
   .events{position:relative}
@@ -93,7 +97,7 @@
   .nowmark .line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,var(--accent) 0%,var(--hair) 64%,transparent);opacity:.5}
   .nowmark .token{position:absolute;left:0;top:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);
     background:radial-gradient(circle at 38% 34%,#fff,var(--accent) 72%);box-shadow:0 0 12px 2px var(--accent-glow),0 0 3px 0 var(--accent)}
-  .nowmark .nlabel{position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:var(--ground);padding:2px 6px;border-radius:2px}
+  .nowmark .nlabel{position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink);background:rgba(11,14,20,.66);border:1px solid var(--hair);padding:3px 9px;border-radius:20px;backdrop-filter:blur(2px)}
   @media (prefers-reduced-motion:no-preference){.nowmark .token{animation:tokenpulse 3.6s ease-in-out infinite}}
   @keyframes tokenpulse{0%,100%{box-shadow:0 0 10px 1px var(--accent-glow),0 0 3px 0 var(--accent)}50%{box-shadow:0 0 17px 4px var(--accent-glow),0 0 4px 0 var(--accent)}}
   .cond{display:flex;flex-wrap:wrap;gap:6px 22px;padding-top:22px;border-top:1px solid var(--hair-soft);font-size:12.5px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
@@ -492,10 +496,12 @@ function verdictFor(T,now){
 function render(){
   const p=placeNow(),date=baseDate(),now=new Date(),T=sunTimes(date,p.lat,p.lng);
   const evalDate=isToday()?now:T.solarNoon,pos=sunPos(evalDate,p.lat,p.lng),ph=phaseOf(pos.altitude),rising=evalDate<T.solarNoon;
-  const tintMap={night:'#0d1018',astro:'#141826',naut:'#1c2740',blue:'#27425f',golden:'#6a5026',day:'#39434f'};
-  el('sky').style.setProperty('--tint',isToday()?tintMap[ph]:'#10131C');
+  const tintMap={night:'#0e1220',astro:'#161a2c',naut:'#1f2c49',blue:'#2c4a6b',golden:'#7a5a2c',day:'#3d4855'};
+  const skyGlowMap={night:'rgba(72,94,142,.10)',astro:'rgba(72,102,162,.13)',naut:'rgba(72,112,178,.17)',blue:'rgba(98,152,208,.23)',golden:'rgba(233,170,80,.26)',day:'rgba(150,172,205,.16)'};
+  el('sky').style.setProperty('--tint',isToday()?tintMap[ph]:'#121622');
+  el('sky').style.setProperty('--sky-glow',isToday()?skyGlowMap[ph]:'rgba(120,140,180,.08)');
   const accentMap={night:'#5d6b86',astro:'#4f6a90',naut:'#5274a0',blue:'#6c93bd',golden:'#E8AC55',day:'#B9C6D6'};
-  const glowMap={night:'rgba(120,150,200,.10)',astro:'rgba(95,135,195,.12)',naut:'rgba(95,145,205,.14)',blue:'rgba(120,165,215,.16)',golden:'rgba(232,172,85,.20)',day:'rgba(185,198,214,.14)'};
+  const glowMap={night:'rgba(120,150,200,.12)',astro:'rgba(95,135,195,.14)',naut:'rgba(95,145,205,.16)',blue:'rgba(120,165,215,.20)',golden:'rgba(232,172,85,.26)',day:'rgba(185,198,214,.16)'};
   const root=document.documentElement.style;
   root.setProperty('--accent',accentMap[ph]);root.setProperty('--accent-glow',glowMap[ph]);
   buildSpine(T,p);buildEvents(T,now,p);
@@ -699,13 +705,16 @@ function drawCard(){
   const evalDate=isToday()?now:T.solarNoon,pos=sunPos(evalDate,p.lat,p.lng),ph=phaseOf(pos.altitude),rising=evalDate<T.solarNoon;
   const acc=ACC[ph]||HEX.dayp;
   let bg=x.createLinearGradient(0,0,0,H);bg.addColorStop(0,HEX.ground);bg.addColorStop(1,HEX.ground2);x.fillStyle=bg;x.fillRect(0,0,W,H);
-  const tintM={night:'#0d1018',astro:'#141826',naut:'#1c2740',blue:'#27425f',golden:'#48381f',day:'#2a313b'};
+  const tintM={night:'#0e1220',astro:'#161a2c',naut:'#1f2c49',blue:'#2c4a6b',golden:'#5c4421',day:'#2f3744'};
   const tint=tintM[ph]||HEX.night;
-  let gl=x.createRadialGradient(W/2,-120,80,W/2,-120,820);gl.addColorStop(0,tint);gl.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gl;x.fillRect(0,0,W,H);
+  let gl=x.createRadialGradient(W/2,-120,80,W/2,-120,840);gl.addColorStop(0,tint);gl.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gl;x.fillRect(0,0,W,H);
+  // atmospheric horizon glow in the live light colour
+  const skyG={night:'rgba(72,94,142,.10)',astro:'rgba(72,102,162,.12)',naut:'rgba(72,112,178,.15)',blue:'rgba(98,152,208,.20)',golden:'rgba(233,170,80,.24)',day:'rgba(150,172,205,.13)'};
+  let sg2=x.createRadialGradient(W/2,-70,40,W/2,-70,660);sg2.addColorStop(0,skyG[ph]||'rgba(0,0,0,0)');sg2.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=sg2;x.fillRect(0,0,W,560);
   // vignette for depth
   let vg=x.createRadialGradient(W/2,H*0.34,W*0.2,W/2,H*0.34,W*0.85);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.42)');x.fillStyle=vg;x.fillRect(0,0,W,H);
   // header
-  x.fillStyle=HEX.ink;x.font='44px Georgia, serif';x.textBaseline='alphabetic';x.fillText('Tamar Light',90,150);
+  x.fillStyle=HEX.ink;x.font='44px "Fraunces", Georgia, serif';x.textBaseline='alphabetic';x.fillText('Tamar Light',90,150);
   x.fillStyle=HEX.inkdim;x.font='26px system-ui, sans-serif';
   const dlab=new Intl.DateTimeFormat('en-AU',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'}).format(date);
   x.fillText(p.n+' \u00b7 '+dlab,90,196);
@@ -753,7 +762,7 @@ function drawCard(){
     let tg=x.createRadialGradient(cxs-3,yy-3,1,cxs,yy,9);tg.addColorStop(0,'#ffffff');tg.addColorStop(.7,acc);tg.addColorStop(1,acc);
     x.fillStyle=tg;x.beginPath();x.arc(cxs,yy,8,0,7);x.fill();}
   // right column: phase, painter read, verdict
-  const tx=478;x.textBaseline='alphabetic';x.fillStyle=HEX.ink;x.font='300 62px Georgia, serif';
+  const tx=478;x.textBaseline='alphabetic';x.fillStyle=HEX.ink;x.font='300 62px "Fraunces", Georgia, serif';
   let hy=wrapText(x,phaseLabel(ph,rising),tx,sy+58,540,62);
   const readCloud=isToday()?cloudAt(now):avgCloud(T.goldStartPM,T.blueDusk);
   const readTxt=painterRead(ph,rising,readCloud,pos.altitude).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
@@ -780,6 +789,7 @@ function drawCard(){
 }
 async function shareCard(){
   try{
+    if(document.fonts&&document.fonts.ready)try{await document.fonts.ready;}catch(e){}
     const cv=drawCard();
     const blob=await new Promise(function(res){cv.toBlob(res,'image/png');});
     if(!blob){toast('Could not build the card');return;}
