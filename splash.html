@@ -33,7 +33,7 @@
   // ── CONFIG ────────────────────────────────────────────────────────────────
   //  ↓ Point this at your app's main page ↓
   var NEXT_PAGE = 'tamar-light.html';
-  var DURATION  = 10.0; // total animation duration in seconds
+  var DURATION  = 5.0; // total animation duration in seconds
 
   // ── HELPERS ───────────────────────────────────────────────────────────────
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
@@ -86,7 +86,7 @@
   }
 
   // ── SKY PALETTE ───────────────────────────────────────────────────────────
-  var T=['0','1.5','3.5','6','8.5'].map(Number);
+  var T=[0,0.75,1.75,3.0,4.25];
   var C_TOP  =['#0b091a','#0b091a','#0e0c26','#14183e','#1a2860'];
   var C_UMID =['#141050','#141050','#281560','#48204e','#703858'];
   var C_MID  =['#1c1448','#1c1448','#3d1a5c','#7a2e5e','#a84070'];
@@ -249,7 +249,7 @@
     sky.style.background='linear-gradient(180deg,'+top+' 0%,'+umid+' 22%,'+mid+' 55%,'+hrz+' 100%)';
 
     // Stars
-    var starOp = clamp(1-(t-1.5)/2.5,0,1);
+    var starOp = clamp(1-(t-0.75)/1.25,0,1);
     starCircles.forEach(function(c,i){
       var tw2 = 0.7+0.3*Math.abs(Math.sin(t*(1.1+i*0.11)+i*1.3));
       var base = STARS[i][3];
@@ -257,22 +257,22 @@
     });
 
     // Moon
-    var mx  = tw(292,346,1.5,5.5,easeInCubic,t);
-    var my  = tw(118,-48,1.5,5.5,easeInCubic,t);
-    var mop = tw(0.92,0,2,5.2,easeInCubic,t);
+    var mx  = tw(292,346,0.75,2.75,easeInCubic,t);
+    var my  = tw(118,-48,0.75,2.75,easeInCubic,t);
+    var mop = tw(0.92,0,1.0,2.6,easeInCubic,t);
     moonWrap.style.left=(mx-22)+'px';
     moonWrap.style.top =(my-22)+'px';
     moonWrap.style.opacity=mop;
 
     // Horizon glow
-    var gop = tw(0,1,2.5,5,easeOutCubic,t);
-    var gsp = tw(50,72,3.5,7,easeOutCubic,t);
+    var gop = tw(0,1,1.25,2.5,easeOutCubic,t);
+    var gsp = tw(50,72,1.75,3.5,easeOutCubic,t);
     hglow.style.opacity=gop;
     hglow.style.background='radial-gradient(ellipse '+gsp+'% 52% at 50% 88%, rgba(255,115,42,0.88), rgba(255,75,18,0.36), transparent)';
 
     // Sun
-    var sy  = tw(618,385,3.5,7,easeOutCubic,t);
-    var sop = tw(0,1,3.5,5,easeOutCubic,t);
+    var sy  = tw(618,385,1.75,3.5,easeOutCubic,t);
+    var sop = tw(0,1,1.75,2.5,easeOutCubic,t);
     var r=34, cx=195;
     sunWrap.style.opacity=sop;
     sunWrap.style.left=(cx-r)+'px';
@@ -284,13 +284,13 @@
     sunDisc.style.width=(r*2)+'px'; sunDisc.style.height=(r*2)+'px';
 
     // Valley fog
-    var fop = tw(0,1,3.5,7,easeOutCubic,t);
+    var fop = tw(0,1,1.75,3.5,easeOutCubic,t);
     fog1.style.opacity=fop;
     fog2.style.opacity=fop*0.65;
 
     // Cloud wisps
-    var wop   = tw(0,0.72,3,5.5,easeOutCubic,t);
-    var drift = tw(0,13,0,8.5,linear,t);
+    var wop   = tw(0,0.72,1.5,2.75,easeOutCubic,t);
+    var drift = tw(0,13,0,4.25,linear,t);
     wispSvg.style.opacity=wop;
     var drifts=[ drift, -drift*0.7, drift*0.5, drift*0.3 ];
     wispEls.forEach(function(w,i){
@@ -298,13 +298,13 @@
     });
 
     // Title
-    var top2 = tw(0,1,6.2,7.8,easeOutCubic,t);
-    var tdy  = tw(20,0,6.2,7.8,easeOutCubic,t);
+    var top2 = tw(0,1,3.1,3.9,easeOutCubic,t);
+    var tdy  = tw(20,0,3.1,3.9,easeOutCubic,t);
     title.style.opacity=top2;
     title.style.transform='translateY('+tdy+'px)';
 
     // Fade to black at end
-    var fend = tw(0,1,8.8,10.0,easeInCubic,t);
+    var fend = tw(0,1,4.4,5.0,easeInCubic,t);
     fadeOut.style.opacity=fend;
 
     if(t < DURATION){
