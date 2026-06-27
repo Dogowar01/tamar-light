@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0b091a">
+  <title>Tamar Light</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #0b091a;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    #stage {
+      position: fixed; inset: 0; overflow: hidden;
+    }
+    /* All child elements are absolutely positioned by JS */
+    #stage > * { position: absolute; }
+  </style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+(function () {
+  // ── CONFIG ────────────────────────────────────────────────────────────────
+  //  ↓ Point this at your app's main page ↓
+  var NEXT_PAGE = 'tamar-light.html';
+  var DURATION  = 8.5; // total animation duration in seconds
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function lerp(a,b,t) { return a+(b-a)*t; }
+  function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
+  function easeInCubic(t) { return t*t*t; }
+  function linear(t){ return t; }
+
+  function tw(from,to,start,end,ease,t){
+    var p = clamp((t-start)/(end-start),0,1);
+    return lerp(from,to,ease(p));
+  }
+
+  function parseHex(h){
+    var n=parseInt(h.replace('#',''),16);
+    return [(n>>16)&255,(n>>8)&255,n&255];
+  }
+  function lc(a,b,t){
+    var ar=parseHex(a),br=parseHex(b);
+    return 'rgb('+Math.round(ar[0]+(br[0]-ar[0])*t)+','+
+                   Math.round(ar[1]+(br[1]-ar[1])*t)+','+
+                   Math.round(ar[2]+(br[2]-ar[2])*t)+')';
+  }
+  function sc(t,stops,colors){
+    for(var i=0;i<stops.length-1;i++){
+      if(t<=stops[i+1]) return lc(colors[i],colors[i+1],clamp((t-stops[i])/(stops[i+1]-stops[i]),0,1));
+    }
+    return colors[colors.length-1];
+  }
+
+  function el(tag,css,parent){
+    var e=document.createElement(tag);
+    if(css) Object.assign(e.style,css);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  function svg(paths,parent){
+    var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    s.setAttribute('width','100%'); s.setAttribute('height','100%');
+    s.setAttribute('viewBox','0 0 390 844');
+    s.setAttribute('preserveAspectRatio','xMidYMid slice');
+    s.style.display='block';
+    paths.forEach(function(p){
+      var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',p.d); path.setAttribute('fill',p.fill);
+      s.appendChild(path);
+    });
+    if(parent) parent.appendChild(s);
+    return s;
+  }
+
+  // ── SKY PALETTE ───────────────────────────────────────────────────────────
+  var T=['0','1.5','3.5','6','8.5'].map(Number);
+  var C_TOP  =['#0b091a','#0b091a','#0e0c26','#14183e','#1a2860'];
+  var C_UMID =['#141050','#141050','#281560','#48204e','#703858'];
+  var C_MID  =['#1c1448','#1c1448','#3d1a5c','#7a2e5e','#a84070'];
+  var C_HRZ  =['#251555','#251555','#6e2040','#c85038','#e09040'];
+
+  // ── MOUNTAIN PATHS ────────────────────────────────────────────────────────
+  var P_GHOST="M0,470 L20,457 L38,445 L54,434 L68,424 L81,415 L92,408 L102,401 L111,395 L119,390 L126,386 L133,383 L139,381 L144,379 L148,378 L152,378 L156,378 L162,378 L168,378 L174,379 L180,380 L186,381 L192,382 L196,382 L200,382 L206,381 L212,380 L218,380 L224,381 L230,382 L236,385 L242,388 L248,392 L254,396 L260,401 L266,407 L272,413 L278,419 L284,425 L290,431 L296,437 L302,443 L308,449 L314,455 L320,461 L326,467 L332,472 L338,477 L344,481 L350,485 L356,488 L362,491 L368,493 L374,495 L380,496 L386,497 L390,497 L390,844 L0,844 Z";
+  var P_FAR  ="M0,510 L18,497 L34,484 L49,472 L62,461 L74,451 L85,441 L95,432 L104,424 L112,417 L119,411 L125,405 L130,400 L135,396 L139,393 L143,391 L146,389 L148,388 L150,388 L152,388 L154,388 L157,389 L160,391 L163,393 L166,396 L169,399 L172,403 L175,407 L178,411 L181,415 L184,419 L187,422 L190,425 L193,427 L196,428 L199,428 L202,427 L205,426 L208,426 L211,427 L214,428 L217,430 L220,432 L223,435 L226,438 L230,442 L234,447 L238,452 L242,457 L246,462 L250,467 L254,472 L258,477 L262,482 L266,487 L270,492 L274,497 L278,502 L282,506 L286,510 L290,513 L294,516 L298,518 L306,522 L314,527 L322,531 L330,534 L338,536 L346,537 L354,538 L362,538 L370,539 L378,539 L386,540 L390,540 L390,844 L0,844 Z";
+  var P_MID  ="M0,550 L15,537 L28,524 L40,512 L51,500 L61,489 L70,479 L78,470 L86,461 L93,453 L99,446 L105,440 L111,434 L116,429 L120,425 L124,421 L128,418 L131,415 L134,413 L136,412 L138,411 L140,410 L142,410 L144,411 L146,413 L148,415 L150,418 L152,421 L154,424 L156,428 L158,432 L160,436 L162,440 L164,444 L166,448 L168,452 L170,456 L172,459 L174,462 L176,465 L178,467 L180,469 L182,470 L184,471 L186,471 L188,471 L190,470 L192,469 L194,467 L196,465 L198,463 L200,461 L202,459 L204,457 L206,456 L208,455 L210,455 L212,456 L214,458 L216,461 L218,464 L220,467 L222,470 L224,473 L226,476 L228,479 L230,481 L233,484 L236,488 L239,492 L242,496 L245,500 L248,504 L251,508 L254,512 L257,516 L260,520 L264,525 L268,530 L272,535 L276,539 L280,543 L284,546 L288,549 L292,551 L296,553 L300,555 L305,558 L310,561 L315,564 L320,567 L325,570 L330,572 L336,574 L342,576 L348,577 L354,578 L360,578 L366,579 L372,579 L378,580 L384,580 L390,580 L390,844 L0,844 Z";
+  var P_NEAR ="M0,600 L12,589 L24,577 L35,566 L45,555 L54,545 L62,536 L70,527 L77,518 L84,510 L90,502 L96,495 L102,488 L107,481 L112,475 L117,469 L121,464 L125,459 L129,454 L132,450 L135,447 L138,444 L140,441 L142,439 L144,438 L146,437 L147,436 L148,436 L149,437 L150,438 L151,440 L152,442 L154,446 L156,451 L158,457 L160,463 L162,470 L164,478 L166,485 L168,491 L170,496 L172,500 L174,502 L175,502 L176,501 L178,497 L180,491 L182,485 L184,479 L186,473 L188,467 L190,461 L192,456 L194,453 L195,451 L196,452 L198,455 L200,459 L202,464 L204,469 L206,474 L208,479 L210,483 L212,486 L214,487 L216,484 L218,479 L220,473 L222,469 L224,466 L226,466 L228,469 L230,474 L232,480 L234,486 L236,491 L238,496 L240,501 L242,506 L244,510 L246,514 L248,518 L250,521 L252,524 L255,528 L258,533 L261,538 L264,543 L267,547 L270,551 L273,555 L276,559 L279,563 L282,567 L285,570 L288,573 L292,578 L296,582 L300,586 L304,590 L308,594 L312,598 L316,601 L320,604 L324,607 L328,610 L332,614 L336,617 L340,620 L344,623 L348,626 L352,629 L356,632 L360,635 L365,638 L370,641 L375,644 L380,646 L385,648 L390,649 L390,844 L0,844 Z";
+  var P_FRONT="M0,668 L7,660 L14,652 L20,644 L26,636 L32,628 L38,621 L44,614 L49,608 L54,602 L58,597 L62,592 L66,588 L70,584 L73,581 L76,578 L79,575 L81,573 L85,570 L87,569 L88,569 L89,570 L91,571 L93,573 L95,575 L97,577 L99,579 L101,581 L103,581 L104,580 L106,576 L108,571 L110,565 L112,559 L114,553 L116,547 L118,540 L120,532 L122,524 L124,516 L126,508 L128,500 L130,492 L132,484 L134,476 L136,469 L138,463 L140,457 L142,452 L144,449 L145,448 L146,448 L147,448 L148,449 L150,452 L152,457 L154,463 L156,470 L158,477 L160,484 L162,491 L164,497 L166,501 L168,504 L170,505 L172,504 L174,501 L176,497 L178,493 L180,489 L182,485 L184,481 L186,477 L188,475 L190,474 L192,474 L194,475 L195,476 L196,477 L198,479 L200,483 L202,487 L204,491 L206,495 L208,497 L210,498 L212,497 L214,492 L216,486 L218,480 L220,474 L222,470 L224,468 L225,467 L226,467 L228,469 L230,473 L232,479 L234,484 L236,488 L238,489 L240,488 L242,485 L244,482 L246,480 L248,480 L250,481 L252,483 L254,487 L256,492 L258,498 L260,504 L262,510 L264,516 L266,522 L268,528 L270,534 L272,540 L274,546 L276,552 L278,558 L280,564 L282,569 L284,574 L286,578 L288,582 L290,586 L292,590 L294,594 L296,598 L298,602 L300,606 L302,610 L304,614 L306,618 L308,621 L310,624 L312,627 L314,630 L316,633 L318,636 L320,638 L322,641 L324,644 L326,647 L328,650 L330,653 L332,656 L334,659 L336,661 L338,664 L340,666 L342,669 L344,671 L346,674 L348,677 L350,680 L353,684 L356,688 L359,692 L362,695 L365,698 L368,701 L371,703 L374,706 L377,708 L380,710 L383,712 L386,714 L390,716 L390,844 L0,844 Z";
+  var P_GROUND="M0,754 Q42,737 88,751 Q136,765 182,749 Q228,733 274,747 Q316,759 348,750 Q368,744 390,748 L390,844 L0,844 Z";
+
+  // ── STAR POSITIONS ────────────────────────────────────────────────────────
+  var STARS=[
+    [28,55,1.5,0.8],[72,28,1,0.6],[118,75,1.2,0.7],[162,42,0.9,0.5],[195,88,1.4,0.9],
+    [238,22,1,0.6],[285,65,1.2,0.7],[345,38,1,0.5],[48,140,1,0.6],[94,118,1.4,0.8],
+    [152,168,0.9,0.5],[198,135,1.1,0.65],[258,98,1,0.6],[312,155,1.4,0.8],[368,125,1,0.5],
+    [18,195,1.1,0.65],[68,218,0.9,0.5],[148,242,1.4,0.8],[232,205,1,0.6],[322,235,1.1,0.65],
+    [375,185,1,0.5],[52,285,0.8,0.45],[108,298,1.2,0.7],[178,310,0.9,0.5],[268,275,1,0.6],
+    [338,295,0.8,0.45],[15,352,1,0.6],[88,328,0.9,0.5],[168,340,1.1,0.65],[258,318,1,0.6],
+    [42,380,0.8,0.45],[132,368,1,0.6],[302,372,1,0.6],[372,355,0.8,0.45],
+  ];
+
+  // ── BUILD DOM ─────────────────────────────────────────────────────────────
+  var stage = document.getElementById('stage');
+
+  // Sky
+  var sky = el('div',{position:'absolute',inset:'0'},stage);
+
+  // Stars
+  var starSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  starSvg.setAttribute('width','100%'); starSvg.setAttribute('height','100%');
+  starSvg.setAttribute('viewBox','0 0 390 844');
+  starSvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  starSvg.style.cssText='position:absolute;inset:0;pointer-events:none';
+  var starCircles = STARS.map(function(s){
+    var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',s[0]); c.setAttribute('cy',s[1]); c.setAttribute('r',s[2]);
+    c.setAttribute('fill','white');
+    starSvg.appendChild(c);
+    return c;
+  });
+  stage.appendChild(starSvg);
+
+  // Background mountains (blurred layers)
+  function mtnLayer(path,fill,blur,opacity){
+    var wrap=el('div',{position:'absolute',inset:'0',filter:'blur('+blur+'px)',opacity:opacity},stage);
+    svg([{d:path,fill:fill}],wrap);
+    return wrap;
+  }
+  mtnLayer(P_GHOST,'#26185a',5,0.44);
+  mtnLayer(P_FAR,  '#1e1252',3,0.58);
+  mtnLayer(P_MID,  '#160e46',1,0.76);
+
+  // Horizon glow
+  var hglow = el('div',{
+    position:'absolute',left:'-50px',top:'355px',width:'490px',height:'240px',
+    opacity:'0',pointerEvents:'none'
+  },stage);
+
+  // Sun (layers: outer bloom, inner bloom, disc)
+  var sunWrap = el('div',{position:'absolute',pointerEvents:'none',opacity:'0'},stage);
+  var sunOuter = el('div',{position:'absolute',borderRadius:'50%',
+    background:'radial-gradient(circle, rgba(255,200,70,0.26) 0%, rgba(255,130,25,0.09) 40%, transparent 65%)'},sunWrap);
+  var sunInner = el('div',{position:'absolute',borderRadius:'50%',
+    background:'radial-gradient(circle, rgba(255,232,125,0.6) 0%, rgba(255,170,52,0.24) 46%, transparent 68%)'},sunWrap);
+  var sunDisc  = el('div',{borderRadius:'50%',
+    background:'radial-gradient(circle at 40% 36%, #fffde4, #ffd060, #ff9c28)',
+    boxShadow:'0 0 28px rgba(255,208,78,0.95), 0 0 60px rgba(255,148,36,0.52)',
+    position:'absolute'},sunWrap);
+
+  // Front mountains (drawn after sun so sun appears behind them)
+  var frontSvg = el('div',{position:'absolute',inset:'0',pointerEvents:'none'},stage);
+  svg([
+    {d:P_NEAR,  fill:'#110a38'},
+    {d:P_FRONT, fill:'#0d0826'},
+    {d:P_GROUND,fill:'#090618'},
+  ],frontSvg);
+
+  // Valley fog
+  var fog1 = el('div',{position:'absolute',left:'0',top:'485px',width:'100%',height:'85px',
+    background:'linear-gradient(180deg,transparent,rgba(240,210,190,0.1) 35%,rgba(240,210,190,0.14) 60%,transparent)',
+    filter:'blur(10px)',opacity:'0',pointerEvents:'none'},stage);
+  var fog2 = el('div',{position:'absolute',left:'0',top:'580px',width:'100%',height:'75px',
+    background:'linear-gradient(180deg,transparent,rgba(235,208,185,0.07) 35%,rgba(235,208,185,0.11) 60%,transparent)',
+    filter:'blur(8px)',opacity:'0',pointerEvents:'none'},stage);
+
+  // Cloud wisps
+  var wispSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  wispSvg.setAttribute('width','100%'); wispSvg.setAttribute('height','100%');
+  wispSvg.setAttribute('viewBox','0 0 390 844');
+  wispSvg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  wispSvg.style.cssText='position:absolute;inset:0;pointer-events:none;opacity:0';
+  var defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  var filt=document.createElementNS('http://www.w3.org/2000/svg','filter');
+  filt.setAttribute('id','wf'); filt.setAttribute('x','-60%'); filt.setAttribute('y','-300%');
+  filt.setAttribute('width','220%'); filt.setAttribute('height','700%');
+  var fgb=document.createElementNS('http://www.w3.org/2000/svg','feGaussianBlur');
+  fgb.setAttribute('stdDeviation','6 2.5'); filt.appendChild(fgb); defs.appendChild(filt);
+  wispSvg.appendChild(defs);
+  var WISPS=[
+    {cx:78, cy:432, rx:68, ry:6, fill:'rgba(255,230,205,0.3)', op:0.7},
+    {cx:205,cy:419, rx:54, ry:5, fill:'rgba(255,225,200,0.22)',op:0.6},
+    {cx:318,cy:439, rx:44, ry:5, fill:'rgba(255,220,195,0.18)',op:0.5},
+    {cx:148,cy:408, rx:35, ry:4, fill:'rgba(255,215,190,0.14)',op:0.4},
+  ];
+  var wispEls = WISPS.map(function(w){
+    var e=document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+    e.setAttribute('cx',w.cx); e.setAttribute('cy',w.cy);
+    e.setAttribute('rx',w.rx); e.setAttribute('ry',w.ry);
+    e.setAttribute('fill',w.fill); e.setAttribute('filter','url(#wf)');
+    e.setAttribute('opacity',w.op);
+    wispSvg.appendChild(e);
+    return {el:e, baseCx:w.cx, op:w.op};
+  });
+  stage.appendChild(wispSvg);
+
+  // Moon
+  var moonWrap = el('div',{position:'absolute',width:'44px',height:'44px',opacity:'0'},stage);
+  el('div',{position:'absolute',inset:'-22px',borderRadius:'50%',
+    background:'radial-gradient(circle,rgba(215,205,255,0.2) 0%,transparent 68%)'},moonWrap);
+  el('div',{position:'absolute',inset:'-9px',borderRadius:'50%',
+    background:'radial-gradient(circle,rgba(235,230,255,0.42) 0%,transparent 62%)'},moonWrap);
+  el('div',{width:'44px',height:'44px',borderRadius:'50%',
+    background:'radial-gradient(circle at 38% 32%, #fdfbff, #ece8f8, #cac4ee)',
+    boxShadow:'0 0 16px rgba(215,208,255,0.78), 0 0 32px rgba(192,185,248,0.38)',
+    position:'absolute'},moonWrap);
+
+  // Title
+  var title = el('div',{
+    position:'absolute',bottom:'15%',left:'0',right:'0',textAlign:'center',
+    opacity:'0',transform:'translateY(20px)',pointerEvents:'none',
+    fontFamily:"'Cormorant Garamond','Palatino Linotype',Georgia,serif",
+    color:'rgba(255,246,222,0.95)',fontSize:'36px',fontWeight:'300',
+    letterSpacing:'10px',textTransform:'uppercase',
+    textShadow:'0 0 38px rgba(255,205,90,0.4)'
+  },stage);
+  title.textContent='Tamar Light';
+  var titleDot = el('div',{marginTop:'12px',color:'rgba(255,218,145,0.38)',
+    fontSize:'9px',letterSpacing:'7px',fontFamily:"'Helvetica Neue',Helvetica,Arial,sans-serif",
+    fontWeight:'300'},title);
+  titleDot.textContent='✦';
+
+  // Fade overlay
+  var fadeOut = el('div',{position:'absolute',inset:'0',background:'#0b091a',opacity:'0',pointerEvents:'none'},stage);
+
+  // ── ANIMATION LOOP ────────────────────────────────────────────────────────
+  var started = null;
+
+  function tick(now){
+    if(!started) started = now;
+    var t = Math.min((now - started) / 1000, DURATION);
+
+    // Sky gradient
+    var top  = sc(t,T,C_TOP);
+    var umid = sc(t,T,C_UMID);
+    var mid  = sc(t,T,C_MID);
+    var hrz  = sc(t,T,C_HRZ);
+    sky.style.background='linear-gradient(180deg,'+top+' 0%,'+umid+' 22%,'+mid+' 55%,'+hrz+' 100%)';
+
+    // Stars
+    var starOp = clamp(1-(t-1.5)/2.5,0,1);
+    starCircles.forEach(function(c,i){
+      var tw2 = 0.7+0.3*Math.abs(Math.sin(t*(1.1+i*0.11)+i*1.3));
+      var base = STARS[i][3];
+      c.setAttribute('opacity', base * tw2 * starOp);
+    });
+
+    // Moon
+    var mx  = tw(292,346,1.5,5.5,easeInCubic,t);
+    var my  = tw(118,-48,1.5,5.5,easeInCubic,t);
+    var mop = tw(0.92,0,2,5.2,easeInCubic,t);
+    moonWrap.style.left=(mx-22)+'px';
+    moonWrap.style.top =(my-22)+'px';
+    moonWrap.style.opacity=mop;
+
+    // Horizon glow
+    var gop = tw(0,1,2.5,5,easeOutCubic,t);
+    var gsp = tw(50,72,3.5,7,easeOutCubic,t);
+    hglow.style.opacity=gop;
+    hglow.style.background='radial-gradient(ellipse '+gsp+'% 52% at 50% 88%, rgba(255,115,42,0.88), rgba(255,75,18,0.36), transparent)';
+
+    // Sun
+    var sy  = tw(618,385,3.5,7,easeOutCubic,t);
+    var sop = tw(0,1,3.5,5,easeOutCubic,t);
+    var r=34, cx=195;
+    sunWrap.style.opacity=sop;
+    sunWrap.style.left=(cx-r)+'px';
+    sunWrap.style.top =(sy-r)+'px';
+    sunWrap.style.width=(r*2)+'px';
+    sunWrap.style.height=(r*2)+'px';
+    sunOuter.style.cssText+='inset:-62px;width:'+(r*2+124)+'px;height:'+(r*2+124)+'px;left:-62px;top:-62px;position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,200,70,0.26) 0%,rgba(255,130,25,0.09) 40%,transparent 65%)';
+    sunInner.style.cssText='position:absolute;left:-30px;top:-30px;width:'+(r*2+60)+'px;height:'+(r*2+60)+'px;border-radius:50%;background:radial-gradient(circle,rgba(255,232,125,0.6) 0%,rgba(255,170,52,0.24) 46%,transparent 68%)';
+    sunDisc.style.width=(r*2)+'px'; sunDisc.style.height=(r*2)+'px';
+
+    // Valley fog
+    var fop = tw(0,1,3.5,7,easeOutCubic,t);
+    fog1.style.opacity=fop;
+    fog2.style.opacity=fop*0.65;
+
+    // Cloud wisps
+    var wop   = tw(0,0.72,3,5.5,easeOutCubic,t);
+    var drift = tw(0,13,0,8.5,linear,t);
+    wispSvg.style.opacity=wop;
+    var drifts=[ drift, -drift*0.7, drift*0.5, drift*0.3 ];
+    wispEls.forEach(function(w,i){
+      w.el.setAttribute('cx', w.baseCx + drifts[i]);
+    });
+
+    // Title
+    var top2 = tw(0,1,6.2,7.8,easeOutCubic,t);
+    var tdy  = tw(20,0,6.2,7.8,easeOutCubic,t);
+    title.style.opacity=top2;
+    title.style.transform='translateY('+tdy+'px)';
+
+    // Fade to black at end
+    var fend = tw(0,1,7.8,8.5,easeInCubic,t);
+    fadeOut.style.opacity=fend;
+
+    if(t < DURATION){
+      requestAnimationFrame(tick);
+    } else {
+      window.location.href = NEXT_PAGE;
+    }
+  }
+
+  requestAnimationFrame(tick);
+
+  // Tap anywhere to skip
+  stage.addEventListener('click', function(){
+    window.location.href = NEXT_PAGE;
+  });
+
+  // ── SVG SCALE HELPER (keep mountains full-bleed on all screen sizes) ──────
+  // The SVG paths are designed for 390x844. On wider screens the
+  // xMidYMid slice preserveAspectRatio keeps them edge-to-edge.
+
+})();
+</script>
+</body>
+</html>
