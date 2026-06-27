@@ -33,7 +33,7 @@
   // ── CONFIG ────────────────────────────────────────────────────────────────
   //  ↓ Point this at your app's main page ↓
   var NEXT_PAGE = 'tamar-light.html';
-  var DURATION  = 12.0; // total animation duration in seconds
+  var DURATION  = 10.0; // total animation duration in seconds
 
   // ── HELPERS ───────────────────────────────────────────────────────────────
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
@@ -304,12 +304,13 @@
     title.style.transform='translateY('+tdy+'px)';
 
     // Fade to black at end
-    var fend = tw(0,1,10.5,12.0,easeInCubic,t);
+    var fend = tw(0,1,8.8,10.0,easeInCubic,t);
     fadeOut.style.opacity=fend;
 
     if(t < DURATION){
       requestAnimationFrame(tick);
     } else {
+      sessionStorage.setItem('splashDone','1');
       window.location.href = NEXT_PAGE;
     }
   }
@@ -318,6 +319,7 @@
 
   // Tap anywhere to skip
   stage.addEventListener('click', function(){
+    sessionStorage.setItem('splashDone','1');
     window.location.href = NEXT_PAGE;
   });
 
